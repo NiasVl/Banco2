@@ -1,32 +1,39 @@
-import { Titular, buscarTitulares } from "./model/Titular.js";
-import { Conta, pegarContas } from "./model/Conta.js";
-import express from 'express'
+
+const { Conta, gerarContas } = require ("./model/Conta.js");
+const express = require ('express')
 
 const app = express()
+gerarContas()
+
+app.use(
+    express.urlencoded({
+        extended: true
+    })
+)
+
+app.use(express.json())
+
 
 app.get('/', function (req, res){
-    let titulares = buscarTitulares()
-    let contas = pegarContas(titulares)
-    res.json(contas)
+     res.json(Conta.contas)
 })
 
-app.get('/autenticar/:agencia/:numero/:senha', function (req, res){
-    // obter da requisição os dados
-    let agencia = parseInt(req.params.agencia)
-    let numero = parseInt(req.params.numero)
-    let senha = parseInt(req.params.senha)
+app.get('/consultar_saldo', function (req, res){
+      //obter da requisição os dados
+     let agencia = parseInt(req.body.agencia)
+     let numero = parseInt(req.body.numero)
+     let senha = parseInt(req.body.senha)
 
-    let titulares = buscarTitulares()
-    let contas = pegarContas(titulares)
-    
-    contas.forEach((conta) =>{
-        if(conta.agencia == agencia && conta.senha == senha && conta.numero_conta == numero){
-            res.json({resp:true})
-        }
-    })
-    res.json({resp:false})
+     let conta = Conta.autenticar(agencia, numero, senha)
+     
+     let resp = conta != null ? conta.consultarSaldo(conta) : "Acesso negado"
+     
+    res.json(resp)
+ })
+
+const porta = 3000
+app.listen(porta, ()=>{
+    console.log(`Operando na porta ${porta}`)
 })
-
-app.listen(3000)
 
 
