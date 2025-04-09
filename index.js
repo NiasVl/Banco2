@@ -1,9 +1,10 @@
 
 const { Conta, gerarContas } = require ("./model/Conta.js");
-const express = require ('express')
+const {ContaCorrente} = require ('./model/ContaCorrente.js');
+
+const express = require ('express');
 
 const app = express()
-gerarContas()
 
 app.use(
     express.urlencoded({
@@ -14,22 +15,49 @@ app.use(
 app.use(express.json())
 
 
-app.get('/', function (req, res){
-     res.json(Conta.contas)
+app.get('/contas', function (req, res){
+    gerarContas()
+    let contas = Conta.contas
+    res.json(Conta.contas)
 })
 
-app.get('/consultar_saldo', function (req, res){
+app.post('/consultar_saldo', function (req, res){
       //obter da requisição os dados
      let agencia = parseInt(req.body.agencia)
      let numero = parseInt(req.body.numero)
      let senha = parseInt(req.body.senha)
+     
+     let retorno = Conta.autenticar(agencia, numero, senha)
 
-     let conta = Conta.autenticar(agencia, numero, senha)
-     
-     let resp = conta != null ? conta.consultarSaldo(conta) : "Acesso negado"
-     
-    res.json(resp)
+     try {
+        let resp = (retorno.conta).visualizarSaldo(retorno.acesso)
+        res.json(
+            {
+                "msg": "Seu valor em saldo é: ", 
+                "valor" : "R$ " + resp.saldo
+            })
+     } catch (error) {
+        res.json(
+            {
+                "msg": "Acesso negado ",
+            })
+     }
  })
+
+app.get('/contas/:acima', (req, res)=>{
+    let acima = parseFloat(req.params.acima)
+    let contas = Conta.contas
+
+    let contasAcima = contas.filter((conta) => conta.saldo < acima )
+    res.json(contasAcima)
+})
+
+app.get('/contasCC/', (req, res)=>{    
+    ContaCorrente.gerarContasCorrentes()
+    let contasCC = ContaCorrente.contasCC
+    res.json(contasCC)
+})
+
 
 const porta = 3000
 app.listen(porta, ()=>{
