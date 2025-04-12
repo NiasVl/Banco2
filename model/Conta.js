@@ -1,4 +1,5 @@
 
+
 const { Titular } = require ('./Titular.js');
 
 class Conta{
@@ -15,19 +16,19 @@ class Conta{
     static autenticar(agencia, numero, senha){
         let contas = Conta.contas
     
-    var contaRetorno = {}
-    contas.forEach((conta) =>{
-         if(conta.agencia == agencia && conta.senha == senha && conta.numero_conta == numero){
-            return contaRetorno = conta
-         }
-         
-     })
+        var contaRetorno = {}
+        contas.forEach((conta) =>{
+            if(conta.agencia == agencia && conta.senha == senha && conta.numero_conta == numero){
+                return contaRetorno = conta
+            }
+            
+        })
 
-     if(contaRetorno){
-        return {conta: contaRetorno, acesso: true}
-     } else {
-        return {conta: null, acesso: false}
-     }
+        if(contaRetorno){
+            return {conta: contaRetorno, acesso: true}
+        } else {
+            return {conta: null, acesso: false}
+        }
     }
 
     visualizarSaldo(acesso){
@@ -38,12 +39,26 @@ class Conta{
         }
     }
 
-    saque(valor){
-
+    saque(valor, acesso){
+        if(acesso){
+            if(valor <= this.saldo){
+                this.saldo = this.saldo - valor
+                return {saque : `Saque de ${valor} realizado com sucesso, seu saldo atual é ${this.saldo}`}
+            } else{
+                return {saque : `Saque não realizado por falta de saldo`}
+            }
+        } else {
+            return {error: "Acesso negado"}
+        }
     }
 
-    depositar(valor){
-
+    depositar(valor, acesso){
+        if(acesso){
+            this.saldo = this.saldo + valor
+            return {deposito : `Realizado deposito de ${valor} com sucesso, seu saldo atual é ${this.saldo}`}
+        } else {
+            return {deposito: "Acesso negado"}
+        }
     }
 
     transferir(contaOrigem, contaDestino ){
