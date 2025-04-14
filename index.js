@@ -77,6 +77,29 @@ app.post('/conta/saque', (req, res)=>{
      }
 })
 
+app.get('/conta/transferir/:agencia/:numero/:senha/:valor/:agenciaD/:numeroD/:senhaD', (req, res) => {
+    let agencia = parseInt(req.params.agencia)
+    let numero = parseInt(req.params.numero)
+    let senha = parseInt(req.params.senha)
+    let valor = parseFloat(req.params.valor)
+    let agenciaD = parseInt(req.params.agenciaD)
+    let numeroD = parseInt(req.params.numeroD)
+    let senhaD = parseInt(req.params.senhaD)
+
+    let retorno = Conta.autenticar(agencia, numero,senha)
+
+    try {
+        let resp = (retorno.conta).transferir(retorno.acesso, valor,agenciaD, numeroD, senhaD)
+        res.json (
+            {
+                "msg" : "deu bom"
+            }
+        )
+    } catch (error) {
+        
+    }
+})
+
 app.post('/conta/deposito', (req, res)=>{
     //obter da requisição os dados
     let agencia = parseInt(req.body.agencia)

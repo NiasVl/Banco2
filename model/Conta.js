@@ -61,9 +61,16 @@ class Conta{
         }
     }
 
-    transferir(contaOrigem, contaDestino ){
+    transferir(acesso,valor,agenciaDestino, numeroDestino, senhaDestino){
+        if (acesso && this.visualizarSaldo > 0) {
+            this.saldo - valor
 
-    }
+
+            autenticar(agenciaDestino, numeroDestino, senhaDestino)
+                return {tranferencia : `De ${valor} realiazada com sucesso para ${contaRetorno.Titular.nome}`}
+    
+
+    }}
 
     cobrarTaxar(){
 
