@@ -61,16 +61,33 @@ class Conta{
         }
     }
 
-    transferir(acesso,valor,agenciaDestino, numeroDestino, senhaDestino){
-        if (acesso && this.visualizarSaldo > 0) {
-            this.saldo - valor
+transferir(acesso, valor, agenciaDestino, numeroDestino, senhaDestino) {
+
+    if (!acesso) {
+        return { error: "Acesso negado" };
+    }
 
 
-            autenticar(agenciaDestino, numeroDestino, senhaDestino)
-                return {tranferencia : `De ${valor} realiazada com sucesso para ${contaRetorno.Titular.nome}`}
-    
+    if (valor > this.saldo) {
+        return { error: "Saldo insuficiente para transferência" };
+    }
 
-    }}
+
+    const destino = Conta.autenticar(agenciaDestino, numeroDestino, senhaDestino);
+    if (!destino.acesso) {
+        return { error: "Conta de destino inválida ou acesso negado" };
+    }
+
+    this.saldo -= valor;
+    destino.conta.saldo += valor;
+
+    return {
+        transferencia: `Transferência de R$${valor} realizada com sucesso para ${destino.conta.titular.nome}`,
+        saldoAtual: this.saldo,
+        Processo: `${destino.conta.titular.nome} agora tem R$${destino.conta.saldo} na conta`
+        
+    };
+}
 
     cobrarTaxar(){
 
@@ -82,7 +99,7 @@ class Conta{
 function gerarContas(){
     Titular.gerarTitulares()
     let titulares = Titular.titulares
-    new Conta(500, 1234, 543, 2598, titulares[0])
+    new Conta(5000, 1234, 543, 2598, titulares[0])
     new Conta(1500, 5678, 789, 78943, titulares[1])
     new Conta(2000, 45678, 7894, 235899, titulares[2]) 
     new Conta(750, 5678, 987, 1234, titulares[3])
@@ -97,4 +114,4 @@ function gerarContas(){
     new Conta(950, 1239, 567, 6780, titulares[12])
 }
 
- module.exports = {Conta, gerarContas}
+ module.exports = { Conta, gerarContas}

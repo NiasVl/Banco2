@@ -77,31 +77,41 @@ app.post('/conta/saque', (req, res)=>{
      }
 })
 
-app.get('/conta/transferir/:agencia/:numero/:senha/:valor/:agenciaD/:numeroD/:senhaD', (req, res) => {
-    let agencia = parseInt(req.params.agencia)
-    let numero = parseInt(req.params.numero)
-    let senha = parseInt(req.params.senha)
-    let valor = parseFloat(req.params.valor)
-    let agenciaD = parseInt(req.params.agenciaD)
-    let numeroD = parseInt(req.params.numeroD)
-    let senhaD = parseInt(req.params.senhaD)
+app.post('/contas/transferir', (req, res) => {
+    const { agencia, numero, senha, valor, agenciaD, numeroD, senhaD } = req.body;
 
-    let retorno = Conta.autenticar(agencia, numero,senha)
+    const valorTransferencia = parseFloat(valor);
+
+    const origem = Conta.autenticar(parseInt(agencia), parseInt(numero), parseInt(senha));
+
+    if (!origem.acesso) {
+        return res.status(403).json({ msg: "Acesso negado à conta de origem" });
+    }
 
     try {
-        let resp = (retorno.conta).transferir(retorno.acesso, valor,agenciaD, numeroD, senhaD)
-        res.json (
-            {
-                "msg" : "deu bom"
-            }
-        )
+        const resultado = origem.conta.transferir(
+            origem.acesso,
+            valorTransferencia,
+            parseInt(agenciaD),
+            parseInt(numeroD),
+            parseInt(senhaD)
+        );
+
+        if (resultado.error) {
+            return res.status(400).json({ msg: resultado.error });
+        }
+
+        res.json({
+            msg: resultado.transferencia,
+            saldoAtual: resultado.saldoAtual
+        });
     } catch (error) {
-        
+        res.status(500).json({ msg: "Erro ao realizar transferência", error: error.message });
     }
-})
+});
 
 app.post('/conta/deposito', (req, res)=>{
-    //obter da requisição os dados
+
     let agencia = parseInt(req.body.agencia)
     let numero = parseInt(req.body.numero)
     let senha = parseInt(req.body.senha)
